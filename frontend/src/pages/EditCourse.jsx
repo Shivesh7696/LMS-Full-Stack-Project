@@ -32,7 +32,8 @@ function EditCourse() {
         });
       } catch (error) {
         setMessage(
-          error.response?.data?.message || "Could not load course."
+          error.response?.data?.message ||
+            "Could not load course."
         );
       } finally {
         setLoading(false);
@@ -50,9 +51,7 @@ function EditCourse() {
       [name]:
         type === "checkbox"
           ? checked
-          : name === "price"
-            ? value
-            : value
+          : value
     }));
   };
 
@@ -70,7 +69,8 @@ function EditCourse() {
       navigate("/instructor");
     } catch (error) {
       setMessage(
-        error.response?.data?.message || "Could not update course."
+        error.response?.data?.message ||
+          "Could not update course."
       );
     } finally {
       setSaving(false);
@@ -78,63 +78,293 @@ function EditCourse() {
   };
 
   if (loading) {
-    return <main className="courses-content">Loading course...</main>;
+    return (
+      <main className="edit-course-page">
+        <div className="edit-course-loading">
+          <span className="edit-course-spinner" />
+          <h2>Loading course details...</h2>
+          <p>Please wait while we prepare your editor.</p>
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main className="courses-content">
-      <Link to="/instructor">← Back to dashboard</Link>
+    <main className="edit-course-page">
+      <header className="edit-course-header">
+        <Link to="/instructor" className="edit-course-logo">
+          <span className="edit-course-logo-icon">L</span>
+          LearnHub
+        </Link>
 
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>Edit Course</h1>
+        <Link
+          to="/instructor"
+          className="edit-course-back-link"
+        >
+          ← Back to dashboard
+        </Link>
+      </header>
 
-        {message && <p className="error-message">{message}</p>}
+      <section className="edit-course-container">
+        <div className="edit-course-heading">
+          <div>
+            <span className="edit-course-eyebrow">
+              INSTRUCTOR WORKSPACE
+            </span>
+            <h1>Edit your course</h1>
+            <p>
+              Update your course details and control its
+              visibility for students.
+            </p>
+          </div>
 
-        <label htmlFor="title">Course Title</label>
-        <input
-          id="title"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
+          <span
+            className={`edit-course-status ${
+              formData.published
+                ? "is-published"
+                : "is-draft"
+            }`}
+          >
+            <span className="edit-course-status-dot" />
+            {formData.published ? "Published" : "Draft"}
+          </span>
+        </div>
 
-        <label htmlFor="description">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          rows={5}
-          required
-        />
+        {message && (
+          <div
+            className="edit-course-error"
+            role="alert"
+          >
+            <span>!</span>
+            {message}
+          </div>
+        )}
 
-        <label htmlFor="price">Price (₹)</label>
-        <input
-          id="price"
-          name="price"
-          type="number"
-          min="0"
-          step="1"
-          value={formData.price}
-          onChange={handleChange}
-          required
-        />
+        <div className="edit-course-layout">
+          <form
+            className="edit-course-form"
+            onSubmit={handleSubmit}
+          >
+            <div className="edit-course-section-heading">
+              <div className="edit-course-section-icon">
+                <span>✎</span>
+              </div>
+              <div>
+                <h2>Course information</h2>
+                <p>Make your course clear and engaging.</p>
+              </div>
+            </div>
 
-        <label className="publish-option">
-          <input
-            type="checkbox"
-            name="published"
-            checked={formData.published}
-            onChange={handleChange}
-          />
-          Publish this course for students
-        </label>
+            <div className="edit-course-field">
+              <label htmlFor="edit-title">
+                Course title <span>*</span>
+              </label>
+              <input
+                id="edit-title"
+                name="title"
+                type="text"
+                placeholder="e.g. Complete Web Development"
+                value={formData.title}
+                onChange={handleChange}
+                maxLength={100}
+                required
+              />
+              <div className="edit-course-field-footer">
+                <span>Choose a title students will understand.</span>
+                <span>{formData.title.length}/100</span>
+              </div>
+            </div>
 
-        <button type="submit" disabled={saving}>
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
-      </form>
+            <div className="edit-course-field">
+              <label htmlFor="edit-description">
+                Course description <span>*</span>
+              </label>
+              <textarea
+                id="edit-description"
+                name="description"
+                placeholder="Describe what students will learn..."
+                value={formData.description}
+                onChange={handleChange}
+                rows={6}
+                maxLength={2000}
+                required
+              />
+              <div className="edit-course-field-footer">
+                <span>Explain the skills and topics covered.</span>
+                <span>{formData.description.length}/2000</span>
+              </div>
+            </div>
+
+            <div className="edit-course-field">
+              <label htmlFor="edit-price">
+                Course price <span>*</span>
+              </label>
+              <div className="edit-course-price-input">
+                <span>₹</span>
+                <input
+                  id="edit-price"
+                  name="price"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={formData.price}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <p className="edit-course-field-hint">
+                Set the price to 0 to offer this course for free.
+              </p>
+            </div>
+
+            <div className="edit-course-publish-box">
+              <div className="edit-course-publish-icon">
+                {formData.published ? "✓" : "◷"}
+              </div>
+
+              <div className="edit-course-publish-copy">
+                <h3>
+                  {formData.published
+                    ? "Course is published"
+                    : "Publish your course"}
+                </h3>
+                <p>
+                  {formData.published
+                    ? "Your course is marked as available to students."
+                    : "Enable this option when your course is ready for students."}
+                </p>
+              </div>
+
+              <label className="edit-course-switch">
+                <input
+                  type="checkbox"
+                  name="published"
+                  checked={formData.published}
+                  onChange={handleChange}
+                  aria-label="Publish course"
+                />
+                <span className="edit-course-switch-track" />
+              </label>
+            </div>
+
+            <div className="edit-course-actions">
+              <Link
+                to="/instructor"
+                className="edit-course-cancel"
+              >
+                Cancel
+              </Link>
+
+              <button
+                type="submit"
+                className="edit-course-save"
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <span className="edit-course-button-spinner" />
+                    Saving changes...
+                  </>
+                ) : (
+                  <>Save Changes <span>→</span></>
+                )}
+              </button>
+            </div>
+          </form>
+
+          <aside className="edit-course-sidebar">
+            <div className="edit-course-preview-card">
+              <div className="edit-course-preview-art">
+                <div className="edit-course-preview-orbit orbit-one" />
+                <div className="edit-course-preview-orbit orbit-two" />
+                <div className="edit-course-preview-symbol">L</div>
+                <span className="edit-course-preview-tag">
+                  LEARNHUB COURSE
+                </span>
+              </div>
+
+              <div className="edit-course-preview-content">
+                <span className="edit-course-preview-label">
+                  LIVE PREVIEW
+                </span>
+
+                <h3>
+                  {formData.title.trim() ||
+                    "Your course title"}
+                </h3>
+
+                <p>
+                  {formData.description.trim() ||
+                    "Your course description will appear here."}
+                </p>
+
+                <div className="edit-course-preview-divider" />
+
+                <div className="edit-course-preview-bottom">
+                  <div>
+                    <span className="edit-course-preview-price-label">
+                      COURSE PRICE
+                    </span>
+                    <strong>
+                      {Number(formData.price) === 0
+                        ? "Free"
+                        : `₹${Number(formData.price).toLocaleString("en-IN")}`}
+                    </strong>
+                  </div>
+
+                  <span
+                    className={`edit-course-preview-status ${
+                      formData.published
+                        ? "is-published"
+                        : "is-draft"
+                    }`}
+                  >
+                    {formData.published ? "Published" : "Draft"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="edit-course-tip">
+              <span className="edit-course-tip-icon">✦</span>
+              <div>
+                <h3>Quick tip</h3>
+                <p>
+                  Use a specific title, a helpful description,
+                  and a fair price to make your course more
+                  appealing to learners.
+                </p>
+              </div>
+            </div>
+
+            <div className="edit-course-checklist">
+              <h3>Before you save</h3>
+              <p>Check these details:</p>
+
+              <div>
+                <span className={formData.title.trim() ? "complete" : ""}>
+                  {formData.title.trim() ? "✓" : "1"}
+                </span>
+                Course title
+              </div>
+
+              <div>
+                <span className={formData.description.trim() ? "complete" : ""}>
+                  {formData.description.trim() ? "✓" : "2"}
+                </span>
+                Course description
+              </div>
+
+              <div>
+                <span className={Number(formData.price) >= 0 && formData.price !== "" ? "complete" : ""}>
+                  {Number(formData.price) >= 0 && formData.price !== "" ? "✓" : "3"}
+                </span>
+                Course price
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
     </main>
   );
 }
